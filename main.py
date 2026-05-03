@@ -6,11 +6,14 @@ from pathlib import Path
 from typing import cast
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, status
 from fastapi.responses import Response
 
+from app.calendar_loader import CalendarStore
 from app.dashboard import DashboardService
+from app.models import CalendarEvent, TodoItem
 from app.renderer import DashboardRenderer
+from app.todo_loader import TodoStore
 
 ROOT = Path(__file__).parent
 
@@ -18,9 +21,13 @@ ROOT = Path(__file__).parent
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     service = DashboardService.from_project_root(ROOT)
+    calendar_store = CalendarStore(ROOT / "data" / "calendar.json")
+    todo_store = TodoStore(ROOT / "data" / "todo.json")
     async with DashboardRenderer(ROOT / "templates") as renderer:
         app.state.dashboard_service = service
         app.state.dashboard_renderer = renderer
+        app.state.calendar_store = calendar_store
+        app.state.todo_store = todo_store
         yield
 
 
@@ -46,6 +53,42 @@ async def dashboard_bmp() -> Response:
         media_type="image/bmp",
         headers={"Cache-Control": "no-store"},
     )
+
+
+@app.get("/calendar")
+async def get_calendar() -> list[CalendarEvent]:
+    store = cast(CalendarStore, app.state.calendar_store)
+    return store.load_all()
+
+
+@app.post("/calendar/add", status_code=status.HTTP_201_CREATED)
+async def add_calendar_event(event: CalendarEvent) -> list[CalendarEvent]:
+    store = cast(CalendarStore, app.state.calendar_store)
+    return store.append(event)
+
+
+@app.post("/calendar/refresh")
+async def refresh_calendar(events: list[CalendarEvent]) -> list[CalendarEvent]:
+    store = cast(CalendarStore, app.state.calendar_store)
+    return store.replace_all(events)
+
+
+@app.get("/todo")
+async def get_todo() -> list[TodoItem]:
+    store = cast(TodoStore, app.state.todo_store)
+    return store.load_all()
+
+
+@app.post("/todo/add", status_code=status.HTTP_201_CREATED)
+async def add_todo(todo: TodoItem) -> list[TodoItem]:
+    store = cast(TodoStore, app.state.todo_store)
+    return store.append(todo)
+
+
+@app.post("/todo/refresh")
+async def refresh_todo(todos: list[TodoItem]) -> list[TodoItem]:
+    store = cast(TodoStore, app.state.todo_store)
+    return store.replace_all(todos)
 
 
 def main() -> None:
