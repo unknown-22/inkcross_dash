@@ -1,0 +1,12 @@
+{
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "text": "コミットメッセージは Conventional Commits の形式に従う必要があります。descriptionは日本語で記載してください。"
+        }
+    ],
+    "github.copilot.chat.pullRequestDescriptionGeneration.instructions": [
+        {
+            "text": "シンプルな日本語でまとめてください"
+        }
+    ]
+}
