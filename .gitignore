@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Local data files
+data/calendar.json
+data/todo.json
