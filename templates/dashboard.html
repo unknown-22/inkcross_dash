@@ -21,7 +21,7 @@
 
     .dashboard {
       display: grid;
-      grid-template-rows: 64px 205px 531px;
+      grid-template-rows: 64px 185px 551px;
       width: 480px;
       height: 800px;
       border: 4px solid #000;
@@ -177,41 +177,53 @@
     }
 
     .hour {
-      min-height: 40px;
-      padding: 2px 4px;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 5px;
+      min-height: 56px;
+      padding: 4px 5px;
       border: 2px solid #aaa;
-      text-align: center;
+      align-items: center;
     }
 
     .hour-weather {
       display: flex;
+      align-items: center;
       justify-content: center;
-      height: 12px;
+      min-width: 0;
     }
 
     .hour-weather .svg-icon {
-      width: 12px;
-      height: 12px;
+      width: 30px;
+      height: 30px;
+    }
+
+    .hour-detail {
+      display: grid;
+      gap: 1px;
+      min-width: 0;
     }
 
     .hour-time {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
+      line-height: 1;
     }
 
     .hour-temp {
       font-size: 16px;
       font-weight: 800;
+      line-height: 1.05;
     }
 
     .hour-rain {
       display: flex;
       gap: 2px;
       align-items: center;
-      justify-content: center;
       color: #555;
       font-size: 11px;
       font-weight: 700;
+      line-height: 1;
     }
 
     .hour-rain .meta-icon {
@@ -369,14 +381,16 @@
       <div class="hourly">
         {% for forecast in data.weather.hourly %}
           <div class="hour">
-            <div class="hour-time">{{ forecast.time.strftime("%H:%M") }}</div>
             <div class="hour-weather">
               <span class="svg-icon" aria-hidden="true">{{ icons["weather-" ~ forecast.icon] }}</span>
             </div>
-            <div class="hour-temp">{{ "%.0f"|format(forecast.temperature) }}°</div>
-            <div class="hour-rain">
-              <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["precipitation"] }}</span>
-              {{ forecast.precipitation_probability if forecast.precipitation_probability is not none else "-" }}%
+            <div class="hour-detail">
+              <div class="hour-time">{{ forecast.time.strftime("%H:%M") }}</div>
+              <div class="hour-temp">{{ "%.0f"|format(forecast.temperature) }}°</div>
+              <div class="hour-rain">
+                <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["precipitation"] }}</span>
+                {{ forecast.precipitation_probability if forecast.precipitation_probability is not none else "-" }}%
+              </div>
             </div>
           </div>
         {% endfor %}
