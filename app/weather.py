@@ -43,7 +43,7 @@ class OpenMeteoClient:
             "hourly": "temperature_2m,weather_code,precipitation_probability",
             "daily": "temperature_2m_max,temperature_2m_min,weather_code",
             "timezone": "Asia/Tokyo",
-            "forecast_days": 1,
+            "forecast_days": 2,
         }
         if self._client is None:
             async with httpx.AsyncClient(timeout=10) as client:
@@ -86,4 +86,4 @@ def parse_open_meteo(payload: dict[str, Any], now: datetime | None = None) -> We
                 icon=icon,
             )
         )
-    return WeatherForecast(daily=daily_forecast, hourly=forecasts[:8])
+    return WeatherForecast(daily=daily_forecast, hourly=forecasts[:4])
