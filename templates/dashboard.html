@@ -21,6 +21,7 @@
 
     .dashboard {
       display: grid;
+      position: relative;
       grid-template-rows: 64px 185px 551px;
       width: 480px;
       height: 800px;
@@ -145,10 +146,28 @@
     }
 
     .weather-label {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
       margin-bottom: 4px;
       font-size: 26px;
       font-weight: 800;
       line-height: 1;
+    }
+
+    .weather-precipitation {
+      display: inline-flex;
+      gap: 3px;
+      align-items: center;
+      color: #555;
+      font-size: 18px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .weather-precipitation .meta-icon {
+      width: 15px;
+      height: 15px;
     }
 
     .temperature {
@@ -343,6 +362,16 @@
       font-size: 16px;
       text-align: center;
     }
+
+    .updated-at {
+      position: absolute;
+      right: 10px;
+      bottom: 6px;
+      color: #555;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1;
+    }
   </style>
 </head>
 <body>
@@ -365,7 +394,13 @@
           <span class="svg-icon" aria-hidden="true">{{ icons["weather-" ~ data.weather.daily.icon] }}</span>
         </div>
         <div class="weather-summary">
-          <div class="weather-label">{{ data.weather.daily.label }}</div>
+          <div class="weather-label">
+            <span>{{ data.weather.daily.label }}</span>
+            <span class="weather-precipitation">
+              <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["precipitation"] }}</span>
+              {{ data.weather.daily.precipitation_probability if data.weather.daily.precipitation_probability is not none else "-" }}%
+            </span>
+          </div>
           <div class="temperature">
             <div>
               <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["temp-high"] }}</span>
@@ -452,6 +487,7 @@
         {% endif %}
       </section>
     </div>
+    <div class="updated-at">{{ data.generated_at.strftime("%Y/%m/%d %H:%M") }}</div>
   </main>
 </body>
 </html>

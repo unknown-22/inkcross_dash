@@ -34,6 +34,7 @@ class DailyForecast(BaseModel):
     temperature_max: float
     temperature_min: float
     weather_code: int
+    precipitation_probability: int | None = None
     label: str
     icon: str
 

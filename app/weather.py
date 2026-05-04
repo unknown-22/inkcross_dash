@@ -41,7 +41,7 @@ class OpenMeteoClient:
             "latitude": TOKYO_LATITUDE,
             "longitude": TOKYO_LONGITUDE,
             "hourly": "temperature_2m,weather_code,precipitation_probability",
-            "daily": "temperature_2m_max,temperature_2m_min,weather_code",
+            "daily": "temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max",
             "timezone": "Asia/Tokyo",
             "forecast_days": 2,
         }
@@ -58,10 +58,12 @@ def parse_open_meteo(payload: dict[str, Any], now: datetime | None = None) -> We
     daily = payload["daily"]
     daily_code = int(daily["weather_code"][0])
     daily_label, daily_icon = describe_weather(daily_code)
+    daily_precipitation = daily.get("precipitation_probability_max", [None])[0]
     daily_forecast = DailyForecast(
         temperature_max=float(daily["temperature_2m_max"][0]),
         temperature_min=float(daily["temperature_2m_min"][0]),
         weather_code=daily_code,
+        precipitation_probability=None if daily_precipitation is None else int(daily_precipitation),
         label=daily_label,
         icon=daily_icon,
     )

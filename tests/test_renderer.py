@@ -21,6 +21,7 @@ async def test_renderer_outputs_four_bit_bmp() -> None:
                 temperature_max=22,
                 temperature_min=14,
                 weather_code=0,
+                precipitation_probability=20,
                 label="晴れ",
                 icon="sun",
             ),
@@ -41,8 +42,10 @@ async def test_renderer_outputs_four_bit_bmp() -> None:
     )
 
     async with DashboardRenderer(Path("templates")) as renderer:
+        html = renderer.render_html(data)
         bmp = await renderer.render_bmp(data)
 
+    assert "2026/05/03 12:00" in html
     assert bmp[:2] == b"BM"
     assert len(bmp) == 192118
     assert int.from_bytes(bmp[18:22], "little", signed=True) == 480
