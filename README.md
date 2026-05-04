@@ -39,7 +39,12 @@ uv run playwright install chromium
 uv run python main.py
 ```
 
-デフォルトでは `0.0.0.0:8000` で起動します。
+デフォルトでは `0.0.0.0:8080` で起動します。
+ポート番号を変える場合は `--port` で指定します。
+
+```bash
+uv run python main.py --port 9000
+```
 
 ## API
 
@@ -55,7 +60,7 @@ uv run python main.py
 例:
 
 ```bash
-curl -o dashboard.bmp http://localhost:8000/dashboard.bmp
+curl -o dashboard.bmp http://localhost:8080/dashboard.bmp
 ```
 
 ### `GET /health`
@@ -75,7 +80,7 @@ curl -o dashboard.bmp http://localhost:8000/dashboard.bmp
 カレンダー項目を全件取得します。
 
 ```bash
-curl http://localhost:8000/calendar
+curl http://localhost:8080/calendar
 ```
 
 #### `POST /calendar/add`
@@ -83,7 +88,7 @@ curl http://localhost:8000/calendar
 カレンダー項目を 1 件追加します。レスポンスは追加後の全件です。
 
 ```bash
-curl -X POST http://localhost:8000/calendar/add \
+curl -X POST http://localhost:8080/calendar/add \
   -H 'Content-Type: application/json' \
   -d '{"title":"チームMTG","start":"2026-05-03T14:00:00","end":"2026-05-03T15:00:00","location":"オンライン"}'
 ```
@@ -93,7 +98,7 @@ curl -X POST http://localhost:8000/calendar/add \
 カレンダー項目を配列全体で置き換えます。レスポンスは置き換え後の全件です。
 
 ```bash
-curl -X POST http://localhost:8000/calendar/refresh \
+curl -X POST http://localhost:8080/calendar/refresh \
   -H 'Content-Type: application/json' \
   -d '[{"title":"朝会","start":"2026-05-03T09:30:00","end":"2026-05-03T10:00:00","location":"オンライン"}]'
 ```
@@ -107,7 +112,7 @@ curl -X POST http://localhost:8000/calendar/refresh \
 ToDo 項目を全件取得します。
 
 ```bash
-curl http://localhost:8000/todo
+curl http://localhost:8080/todo
 ```
 
 #### `POST /todo/add`
@@ -115,7 +120,7 @@ curl http://localhost:8000/todo
 ToDo 項目を 1 件追加します。レスポンスは追加後の全件です。
 
 ```bash
-curl -X POST http://localhost:8000/todo/add \
+curl -X POST http://localhost:8080/todo/add \
   -H 'Content-Type: application/json' \
   -d '{"title":"請求書を送る","done":false,"due":"2026-05-03"}'
 ```
@@ -125,7 +130,7 @@ curl -X POST http://localhost:8000/todo/add \
 ToDo 項目を配列全体で置き換えます。レスポンスは置き換え後の全件です。
 
 ```bash
-curl -X POST http://localhost:8000/todo/refresh \
+curl -X POST http://localhost:8080/todo/refresh \
   -H 'Content-Type: application/json' \
   -d '[{"title":"請求書を送る","done":false,"due":"2026-05-03"},{"title":"牛乳を買う","done":false,"due":null}]'
 ```
@@ -135,7 +140,7 @@ curl -X POST http://localhost:8000/todo/refresh \
 FastAPI が自動生成する Swagger UI です。ブラウザで開くと、利用可能な API の一覧とレスポンス仕様を確認できます。
 
 ```text
-http://localhost:8000/docs
+http://localhost:8080/docs
 ```
 
 ### `GET /openapi.json`
@@ -143,7 +148,7 @@ http://localhost:8000/docs
 FastAPI が自動生成する OpenAPI スキーマです。API クライアント生成や外部ツール連携に利用できます。
 
 ```text
-http://localhost:8000/openapi.json
+http://localhost:8080/openapi.json
 ```
 
 ## Data Files

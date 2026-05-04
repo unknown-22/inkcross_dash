@@ -306,7 +306,7 @@ FastAPIの `lifespan` ハンドラでブラウザを管理するのが綺麗。
 ## 9. デプロイ
 
 - **デプロイ先**: ローカルマシン (自宅サーバー等)
-- 起動方法: `uvicorn main:app --host 0.0.0.0 --port 8000`
+- 起動方法: `uv run python main.py` または `uv run python main.py --port 9000`
 - systemd / Docker等で常駐化することを推奨
 
 ### 9.1 ディレクトリ構成案
@@ -333,7 +333,7 @@ eink-dashboard/
 
 ## 10. 動作確認の流れ
 
-1. ブラウザで `http://localhost:8000/dashboard.bmp` にアクセスして画像が返ることを確認
+1. ブラウザで `http://localhost:8080/dashboard.bmp` にアクセスして画像が返ることを確認
 2. ブラウザでBMPがダウンロードされる場合は、画像ビューアで開いて見た目を確認
 3. `data/todo.json` を編集して再アクセス、内容が反映されることを確認
 4. 端末側のクライアント実装(画像取得 → 表示)と組み合わせて疎通確認

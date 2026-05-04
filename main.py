@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -16,6 +17,7 @@ from app.renderer import DashboardRenderer
 from app.todo_loader import TodoStore
 
 ROOT = Path(__file__).parent
+DEFAULT_PORT = 8080
 
 
 @asynccontextmanager
@@ -91,8 +93,15 @@ async def refresh_todo(todos: list[TodoItem]) -> list[TodoItem]:
     return store.replace_all(todos)
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the Inkcross Dashboard server.")
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT)
+    return parser.parse_args()
+
+
 def main() -> None:
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
+    args = parse_args()
+    uvicorn.run("main:app", host="0.0.0.0", port=args.port, reload=False)
 
 
 if __name__ == "__main__":

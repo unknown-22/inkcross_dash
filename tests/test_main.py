@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from typing import Any
 
 import pytest
 from fastapi import HTTPException
@@ -24,6 +25,38 @@ class FakeFailingService:
 class FakeRenderer:
     async def render_bmp(self, data: object) -> bytes:
         return b"BMfake"
+
+
+def test_main_uses_default_port(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, Any] = {}
+
+    def fake_run(*args: object, **kwargs: object) -> None:
+        captured["args"] = args
+        captured["kwargs"] = kwargs
+
+    monkeypatch.setattr(main.uvicorn, "run", fake_run)
+    monkeypatch.setattr("sys.argv", ["main.py"])
+
+    main.main()
+
+    assert captured["args"] == ("main:app",)
+    assert captured["kwargs"] == {"host": "0.0.0.0", "port": 8080, "reload": False}
+
+
+def test_main_uses_port_argument(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, Any] = {}
+
+    def fake_run(*args: object, **kwargs: object) -> None:
+        captured["args"] = args
+        captured["kwargs"] = kwargs
+
+    monkeypatch.setattr(main.uvicorn, "run", fake_run)
+    monkeypatch.setattr("sys.argv", ["main.py", "--port", "9000"])
+
+    main.main()
+
+    assert captured["args"] == ("main:app",)
+    assert captured["kwargs"] == {"host": "0.0.0.0", "port": 9000, "reload": False}
 
 
 @pytest.mark.asyncio
