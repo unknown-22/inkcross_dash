@@ -21,7 +21,7 @@
 
     .dashboard {
       display: grid;
-      grid-template-rows: 64px 205px 252px 279px;
+      grid-template-rows: 64px 205px 531px;
       width: 480px;
       height: 800px;
       border: 4px solid #000;
@@ -35,6 +35,22 @@
 
     section:last-child {
       border-bottom: 0;
+    }
+
+    .lower-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 0;
+    }
+
+    .lower-sections section {
+      min-width: 0;
+      padding: 10px 12px;
+      border-bottom: 0;
+    }
+
+    .lower-sections section + section {
+      border-left: 3px solid #aaa;
     }
 
     .header {
@@ -240,9 +256,7 @@
 
     .title {
       min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      overflow-wrap: anywhere;
       font-weight: 700;
     }
 
@@ -272,6 +286,50 @@
 
     .todo.due-today .due {
       color: #000;
+    }
+
+    .lower-sections .section-title {
+      gap: 6px;
+      font-size: 20px;
+    }
+
+    .lower-sections .heading-icon {
+      width: 22px;
+      height: 22px;
+    }
+
+    .lower-sections .list {
+      gap: 8px;
+    }
+
+    .lower-sections .event,
+    .lower-sections .todo {
+      grid-template-columns: 58px 1fr;
+      gap: 6px;
+      min-height: 32px;
+      font-size: 16px;
+    }
+
+    .lower-sections .time,
+    .lower-sections .due {
+      gap: 3px;
+      font-size: 14px;
+    }
+
+    .lower-sections .meta-icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    .lower-sections .location {
+      font-size: 13px;
+    }
+
+    .lower-sections .empty {
+      height: 190px;
+      padding: 8px;
+      font-size: 16px;
+      text-align: center;
     }
   </style>
 </head>
@@ -325,59 +383,61 @@
       </div>
     </section>
 
-    <section>
-      <h2 class="section-title">
-        <span class="svg-icon heading-icon" aria-hidden="true">{{ icons["heading-schedule"] }}</span>
-        <span>今日の予定</span>
-      </h2>
-      {% if data.events %}
-        <ul class="list">
-          {% for event in data.events[:4] %}
-            <li class="event">
-              <div class="time">
-                <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["clock"] }}</span>
-                {{ event.start.strftime("%H:%M") }}
-              </div>
-              <div>
-                <div class="title">{{ event.title }}</div>
-                {% if event.location %}
-                  <div class="location">
-                    <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["pin"] }}</span>
-                    {{ event.location }}
-                  </div>
-                {% endif %}
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <div class="empty">予定はありません</div>
-      {% endif %}
-    </section>
+    <div class="lower-sections">
+      <section>
+        <h2 class="section-title">
+          <span class="svg-icon heading-icon" aria-hidden="true">{{ icons["heading-schedule"] }}</span>
+          <span>今日の予定</span>
+        </h2>
+        {% if data.events %}
+          <ul class="list">
+            {% for event in data.events[:4] %}
+              <li class="event">
+                <div class="time">
+                  <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["clock"] }}</span>
+                  {{ event.start.strftime("%H:%M") }}
+                </div>
+                <div>
+                  <div class="title">{{ event.title }}</div>
+                  {% if event.location %}
+                    <div class="location">
+                      <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["pin"] }}</span>
+                      {{ event.location }}
+                    </div>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="empty">予定はありません</div>
+        {% endif %}
+      </section>
 
-    <section>
-      <h2 class="section-title">
-        <span class="svg-icon heading-icon" aria-hidden="true">{{ icons["heading-todo"] }}</span>
-        <span>ToDo</span>
-      </h2>
-      {% if data.todos %}
-        <ul class="list">
-          {% for todo in data.todos %}
-            <li class="todo{% if todo.is_overdue_or_due_today(data.generated_at.date()) %} due-today{% endif %}">
-              <div class="due">
-                <span class="svg-icon meta-icon" aria-hidden="true">
-                  {{ icons["alert"] if todo.is_overdue_or_due_today(data.generated_at.date()) else icons["due"] }}
-                </span>
-                {{ todo.due.strftime("%m/%d") if todo.due else "-" }}
-              </div>
-              <div class="title">{{ todo.title }}</div>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <div class="empty">未完了タスクはありません</div>
-      {% endif %}
-    </section>
+      <section>
+        <h2 class="section-title">
+          <span class="svg-icon heading-icon" aria-hidden="true">{{ icons["heading-todo"] }}</span>
+          <span>ToDo</span>
+        </h2>
+        {% if data.todos %}
+          <ul class="list">
+            {% for todo in data.todos %}
+              <li class="todo{% if todo.is_overdue_or_due_today(data.generated_at.date()) %} due-today{% endif %}">
+                <div class="due">
+                  <span class="svg-icon meta-icon" aria-hidden="true">
+                    {{ icons["alert"] if todo.is_overdue_or_due_today(data.generated_at.date()) else icons["due"] }}
+                  </span>
+                  {{ todo.due.strftime("%m/%d") if todo.due else "-" }}
+                </div>
+                <div class="title">{{ todo.title }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="empty">未完了タスクはありません</div>
+        {% endif %}
+      </section>
+    </div>
   </main>
 </body>
 </html>
