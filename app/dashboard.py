@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 from app.calendar_loader import CalendarLoader
 from app.models import DashboardData
 from app.todo_loader import TodoLoader
-from app.weather import OpenMeteoClient
+from app.weather import JmaWeatherClient
 
 WEEKDAYS = ("月", "火", "水", "木", "金", "土", "日")
 TOKYO_TZ = ZoneInfo("Asia/Tokyo")
@@ -16,7 +16,7 @@ TOKYO_TZ = ZoneInfo("Asia/Tokyo")
 class DashboardService:
     def __init__(
         self,
-        weather_client: OpenMeteoClient,
+        weather_client: JmaWeatherClient,
         calendar_loader: CalendarLoader,
         todo_loader: TodoLoader,
     ) -> None:
@@ -27,7 +27,7 @@ class DashboardService:
     @classmethod
     def from_project_root(cls, root: Path) -> DashboardService:
         return cls(
-            weather_client=OpenMeteoClient(),
+            weather_client=JmaWeatherClient(),
             calendar_loader=CalendarLoader(root / "data" / "calendar.json"),
             todo_loader=TodoLoader(root / "data" / "todo.json"),
         )

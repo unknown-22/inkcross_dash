@@ -9,7 +9,7 @@ E-ink 端末向けのダッシュボード画像を生成・配信する FastAPI
 ## Features
 
 - 480x800 縦画面の E-ink 端末向けダッシュボード生成
-- Open-Meteo API による東京周辺の天気予報表示
+- 気象庁 JSON による東京地方の天気予報表示
 - `data/calendar.json` から今日の予定を読み込み
 - `data/todo.json` から未完了 ToDo を読み込み
 - カレンダーと ToDo の取得・追加・全リフレッシュ API
@@ -214,7 +214,7 @@ uv run pytest tests/test_renderer.py
 │   ├── dashboard.py      # データ収集と DashboardData 構築
 │   ├── renderer.py       # HTML レンダリングと BMP 生成
 │   ├── quantize.py       # 4 階調量子化と 4bit BMP エンコード
-│   ├── weather.py        # Open-Meteo API クライアント
+│   ├── weather.py        # 気象庁 JSON クライアント
 │   ├── calendar_loader.py
 │   ├── json_store.py     # JSON 配列の読み書き
 │   ├── todo_loader.py
