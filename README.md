@@ -217,6 +217,8 @@ uv run pytest tests/test_renderer.py
 ├── data/
 │   ├── calendar.json
 │   └── todo.json
+├── static/
+│   └── icons/             # ダッシュボード表示用 SVG アイコン
 ├── templates/
 │   └── dashboard.html
 ├── tests/
