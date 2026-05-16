@@ -23,6 +23,9 @@ class FakeFailingService:
 
 
 class FakeRenderer:
+    def render_html(self, data: object) -> str:
+        return "<!doctype html><html><body>fake</body></html>"
+
     async def render_bmp(self, data: object) -> bytes:
         return b"BMfake"
 
@@ -78,6 +81,31 @@ async def test_dashboard_bmp_returns_500_on_generation_error() -> None:
 
     with pytest.raises(HTTPException) as exc_info:
         await main.dashboard_bmp()
+
+    exception = exc_info.value
+    assert exception.status_code == 500
+    assert exception.detail == "dashboard generation failed"
+
+
+@pytest.mark.asyncio
+async def test_dashboard_html_response() -> None:
+    main.app.state.dashboard_service = FakeService()
+    main.app.state.dashboard_renderer = FakeRenderer()
+
+    response = await main.dashboard_html()
+
+    assert response.media_type == "text/html"
+    assert response.headers["cache-control"] == "no-store"
+    assert response.body == b"<!doctype html><html><body>fake</body></html>"
+
+
+@pytest.mark.asyncio
+async def test_dashboard_html_returns_500_on_generation_error() -> None:
+    main.app.state.dashboard_service = FakeFailingService()
+    main.app.state.dashboard_renderer = FakeRenderer()
+
+    with pytest.raises(HTTPException) as exc_info:
+        await main.dashboard_html()
 
     exception = exc_info.value
     assert exception.status_code == 500

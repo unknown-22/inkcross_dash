@@ -57,6 +57,22 @@ async def dashboard_bmp() -> Response:
     )
 
 
+@app.get("/dashboard.html")
+async def dashboard_html() -> Response:
+    service = cast(DashboardService, app.state.dashboard_service)
+    renderer = cast(DashboardRenderer, app.state.dashboard_renderer)
+    try:
+        data = await service.build()
+        html = renderer.render_html(data)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="dashboard generation failed") from exc
+    return Response(
+        content=html,
+        media_type="text/html",
+        headers={"Cache-Control": "no-store"},
+    )
+
+
 @app.get("/calendar")
 async def get_calendar() -> list[CalendarEvent]:
     store = cast(CalendarStore, app.state.calendar_store)

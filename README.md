@@ -63,6 +63,19 @@ uv run python main.py --port 9000
 curl -o dashboard.bmp http://localhost:8080/dashboard.bmp
 ```
 
+### `GET /dashboard.html`
+
+ダッシュボードを HTML 形式で返します。ブラウザで表示確認したい場合や、BMP 変換前のレイアウトを確認したい場合に利用できます。
+
+- `Content-Type`: `text/html`
+- キャッシュ: `Cache-Control: no-store`
+
+例:
+
+```bash
+curl http://localhost:8080/dashboard.html
+```
+
 ### `GET /health`
 
 ヘルスチェック用エンドポイントです。
