@@ -63,6 +63,25 @@ def test_main_uses_port_argument(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.asyncio
+async def test_index_redirects_to_manage() -> None:
+    response = await main.index()
+
+    assert response.status_code == 307
+    assert response.headers["location"] == "/manage"
+
+
+@pytest.mark.asyncio
+async def test_manage_response() -> None:
+    response = await main.manage()
+
+    assert response.media_type == "text/html"
+    assert response.headers["cache-control"] == "no-store"
+    assert b"Inkcross Dashboard" in response.body
+    assert b"/calendar/refresh" in response.body
+    assert b"/todo/refresh" in response.body
+
+
+@pytest.mark.asyncio
 async def test_dashboard_bmp_response() -> None:
     main.app.state.dashboard_service = FakeService()
     main.app.state.dashboard_renderer = FakeRenderer()

@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inkcross Dashboard 管理</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      color: #1b1b1b;
+      background: #f4f5f1;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+    }
+
+    body {
+      margin: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px solid #202020;
+      border-radius: 6px;
+      color: #fff;
+      background: #202020;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      color: #202020;
+      background: #fff;
+    }
+
+    button.danger {
+      border-color: #8f2424;
+      background: #8f2424;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="datetime-local"] {
+      width: 100%;
+      min-height: 40px;
+      padding: 8px 10px;
+      border: 1px solid #8a8d84;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #4c5048;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .shell {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .topbar {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid #202020;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 40px);
+      line-height: 1.1;
+    }
+
+    .status {
+      min-height: 22px;
+      color: #4c5048;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .panel {
+      min-width: 0;
+      padding: 16px;
+      border: 1px solid #c9cbc2;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .panel-header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #d8dbd1;
+    }
+
+    .form-grid .wide {
+      grid-column: 1 / -1;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid #d8dbd1;
+      border-radius: 8px;
+      background: #fbfcf8;
+    }
+
+    .item.done .item-title {
+      color: #6d7167;
+      text-decoration: line-through;
+    }
+
+    .item-title {
+      margin-bottom: 5px;
+      overflow-wrap: anywhere;
+      font-weight: 800;
+    }
+
+    .meta {
+      color: #555a50;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .empty {
+      display: grid;
+      place-items: center;
+      min-height: 120px;
+      color: #555a50;
+      border: 1px dashed #aeb2a7;
+      border-radius: 8px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 860px) {
+      .shell {
+        padding: 16px;
+      }
+
+      .topbar,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar,
+      .grid,
+      .form-grid {
+        display: grid;
+      }
+
+      .status {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .form-grid,
+      .item {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        justify-content: stretch;
+      }
+
+      .actions button {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <h1>Inkcross Dashboard 管理</h1>
+      <div class="status" id="status" role="status">読み込み中</div>
+    </header>
+
+    <div class="grid">
+      <section class="panel" aria-labelledby="calendar-heading">
+        <div class="panel-header">
+          <h2 id="calendar-heading">カレンダー</h2>
+          <button type="button" id="save-events">保存</button>
+        </div>
+        <form class="form-grid" id="event-form">
+          <label class="wide">
+            タイトル
+            <input type="text" id="event-title" autocomplete="off" required>
+          </label>
+          <label>
+            開始
+            <input type="datetime-local" id="event-start" required>
+          </label>
+          <label>
+            終了
+            <input type="datetime-local" id="event-end">
+          </label>
+          <label class="wide">
+            場所
+            <input type="text" id="event-location" autocomplete="off">
+          </label>
+          <div class="actions wide">
+            <button type="button" class="secondary" id="cancel-event" hidden>キャンセル</button>
+            <button type="submit">予定を追加</button>
+          </div>
+        </form>
+        <div class="list" id="event-list"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="todo-heading">
+        <div class="panel-header">
+          <h2 id="todo-heading">ToDo</h2>
+          <button type="button" id="save-todos">保存</button>
+        </div>
+        <form class="form-grid" id="todo-form">
+          <label class="wide">
+            タイトル
+            <input type="text" id="todo-title" autocomplete="off" required>
+          </label>
+          <label>
+            期限
+            <input type="date" id="todo-due">
+          </label>
+          <label>
+            完了
+            <input type="checkbox" id="todo-done">
+          </label>
+          <div class="actions wide">
+            <button type="button" class="secondary" id="cancel-todo" hidden>キャンセル</button>
+            <button type="submit">タスクを追加</button>
+          </div>
+        </form>
+        <div class="list" id="todo-list"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const state = {
+      events: [],
+      todos: [],
+      editingEvent: null,
+      editingTodo: null,
+    };
+
+    const status = document.querySelector("#status");
+    const eventForm = document.querySelector("#event-form");
+    const todoForm = document.querySelector("#todo-form");
+
+    const setStatus = (message) => {
+      status.textContent = message;
+    };
+
+    const requestJson = async (url, options = {}) => {
+      const response = await fetch(url, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+      });
+      if (!response.ok) {
+        throw new Error(`${url} failed: ${response.status}`);
+      }
+      return response.json();
+    };
+
+    const toDateTimeInput = (value) => (value ? value.slice(0, 16) : "");
+    const fromOptionalText = (value) => value.trim() || null;
+    const formatDateTime = (value) => {
+      if (!value) {
+        return "-";
+      }
+      return value.replace("T", " ").slice(0, 16);
+    };
+
+    const resetEventForm = () => {
+      state.editingEvent = null;
+      eventForm.reset();
+      eventForm.querySelector("button[type='submit']").textContent = "予定を追加";
+      document.querySelector("#cancel-event").hidden = true;
+    };
+
+    const resetTodoForm = () => {
+      state.editingTodo = null;
+      todoForm.reset();
+      todoForm.querySelector("button[type='submit']").textContent = "タスクを追加";
+      document.querySelector("#cancel-todo").hidden = true;
+    };
+
+    const renderEvents = () => {
+      const list = document.querySelector("#event-list");
+      list.replaceChildren();
+      if (state.events.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "予定はありません";
+        list.append(empty);
+        return;
+      }
+
+      state.events
+        .map((event, index) => ({ event, index }))
+        .sort((a, b) => a.event.start.localeCompare(b.event.start))
+        .forEach(({ event, index }) => {
+          const item = document.createElement("article");
+          item.className = "item";
+          item.innerHTML = `
+            <div>
+              <div class="item-title"></div>
+              <div class="meta"></div>
+            </div>
+            <div class="actions">
+              <button type="button" class="secondary" data-action="edit">編集</button>
+              <button type="button" class="danger" data-action="delete">削除</button>
+            </div>
+          `;
+          item.querySelector(".item-title").textContent = event.title;
+          item.querySelector(".meta").textContent = [
+            `${formatDateTime(event.start)} - ${formatDateTime(event.end)}`,
+            event.location,
+          ].filter(Boolean).join(" / ");
+          item.querySelector("[data-action='edit']").addEventListener("click", () => {
+            state.editingEvent = index;
+            document.querySelector("#event-title").value = event.title;
+            document.querySelector("#event-start").value = toDateTimeInput(event.start);
+            document.querySelector("#event-end").value = toDateTimeInput(event.end);
+            document.querySelector("#event-location").value = event.location || "";
+            eventForm.querySelector("button[type='submit']").textContent = "予定を更新";
+            document.querySelector("#cancel-event").hidden = false;
+          });
+          item.querySelector("[data-action='delete']").addEventListener("click", () => {
+            state.events.splice(index, 1);
+            renderEvents();
+            setStatus("予定を削除しました。保存すると反映されます");
+          });
+          list.append(item);
+        });
+    };
+
+    const renderTodos = () => {
+      const list = document.querySelector("#todo-list");
+      list.replaceChildren();
+      if (state.todos.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "タスクはありません";
+        list.append(empty);
+        return;
+      }
+
+      state.todos.forEach((todo, index) => {
+        const item = document.createElement("article");
+        item.className = todo.done ? "item done" : "item";
+        item.innerHTML = `
+          <div>
+            <div class="item-title"></div>
+            <div class="meta"></div>
+          </div>
+          <div class="actions">
+            <button type="button" class="secondary" data-action="toggle"></button>
+            <button type="button" class="secondary" data-action="edit">編集</button>
+            <button type="button" class="danger" data-action="delete">削除</button>
+          </div>
+        `;
+        item.querySelector(".item-title").textContent = todo.title;
+        item.querySelector(".meta").textContent = `期限: ${todo.due || "-"}`;
+        item.querySelector("[data-action='toggle']").textContent = todo.done ? "未完了" : "完了";
+        item.querySelector("[data-action='toggle']").addEventListener("click", () => {
+          state.todos[index] = { ...todo, done: !todo.done };
+          renderTodos();
+          setStatus("完了状態を変更しました。保存すると反映されます");
+        });
+        item.querySelector("[data-action='edit']").addEventListener("click", () => {
+          state.editingTodo = index;
+          document.querySelector("#todo-title").value = todo.title;
+          document.querySelector("#todo-due").value = todo.due || "";
+          document.querySelector("#todo-done").checked = todo.done;
+          todoForm.querySelector("button[type='submit']").textContent = "タスクを更新";
+          document.querySelector("#cancel-todo").hidden = false;
+        });
+        item.querySelector("[data-action='delete']").addEventListener("click", () => {
+          state.todos.splice(index, 1);
+          renderTodos();
+          setStatus("タスクを削除しました。保存すると反映されます");
+        });
+        list.append(item);
+      });
+    };
+
+    eventForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const item = {
+        title: document.querySelector("#event-title").value.trim(),
+        start: document.querySelector("#event-start").value,
+        end: document.querySelector("#event-end").value || null,
+        location: fromOptionalText(document.querySelector("#event-location").value),
+      };
+      if (state.editingEvent === null) {
+        state.events.push(item);
+      } else {
+        state.events[state.editingEvent] = item;
+      }
+      resetEventForm();
+      renderEvents();
+      setStatus("予定を変更しました。保存すると反映されます");
+    });
+
+    todoForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const item = {
+        title: document.querySelector("#todo-title").value.trim(),
+        done: document.querySelector("#todo-done").checked,
+        due: document.querySelector("#todo-due").value || null,
+      };
+      if (state.editingTodo === null) {
+        state.todos.push(item);
+      } else {
+        state.todos[state.editingTodo] = item;
+      }
+      resetTodoForm();
+      renderTodos();
+      setStatus("タスクを変更しました。保存すると反映されます");
+    });
+
+    document.querySelector("#cancel-event").addEventListener("click", resetEventForm);
+    document.querySelector("#cancel-todo").addEventListener("click", resetTodoForm);
+
+    document.querySelector("#save-events").addEventListener("click", async () => {
+      setStatus("予定を保存中");
+      state.events = await requestJson("/calendar/refresh", {
+        method: "POST",
+        body: JSON.stringify(state.events),
+      });
+      renderEvents();
+      setStatus("予定を保存しました");
+    });
+
+    document.querySelector("#save-todos").addEventListener("click", async () => {
+      setStatus("タスクを保存中");
+      state.todos = await requestJson("/todo/refresh", {
+        method: "POST",
+        body: JSON.stringify(state.todos),
+      });
+      renderTodos();
+      setStatus("タスクを保存しました");
+    });
+
+    const load = async () => {
+      try {
+        const [events, todos] = await Promise.all([
+          requestJson("/calendar"),
+          requestJson("/todo"),
+        ]);
+        state.events = events;
+        state.todos = todos;
+        renderEvents();
+        renderTodos();
+        setStatus("読み込み完了");
+      } catch (error) {
+        console.error(error);
+        setStatus("読み込みに失敗しました");
+      }
+    };
+
+    load();
+  </script>
+</body>
+</html>

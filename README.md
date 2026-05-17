@@ -12,6 +12,7 @@ E-ink 端末向けのダッシュボード画像を生成・配信する FastAPI
 - 気象庁 JSON による東京地方の天気予報表示
 - `data/calendar.json` から今日の予定を読み込み
 - `data/todo.json` から未完了 ToDo を読み込み
+- ブラウザからカレンダーと ToDo を操作できる管理画面
 - カレンダーと ToDo の取得・追加・全リフレッシュ API
 - Playwright で HTML をレンダリングし、Pillow で 4 階調 BMP に変換
 - 端末側で扱いやすい固定 URL の画像配信
@@ -47,6 +48,22 @@ uv run python main.py --port 9000
 ```
 
 ## API
+
+### `GET /`
+
+管理画面 `/manage` へリダイレクトします。
+
+### `GET /manage`
+
+ブラウザでカレンダーと ToDo を操作する管理画面を表示します。
+
+- カレンダー: 一覧、追加、編集、削除、保存
+- ToDo: 一覧、追加、編集、削除、完了状態の切り替え、保存
+- 保存時は既存の `/calendar/refresh` と `/todo/refresh` を使って JSON 全体を更新します
+
+```text
+http://localhost:8080/manage
+```
 
 ### `GET /dashboard.bmp`
 

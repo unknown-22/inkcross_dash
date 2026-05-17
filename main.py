@@ -8,7 +8,8 @@ from typing import cast
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, status
-from fastapi.responses import Response
+from fastapi.responses import RedirectResponse, Response
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.calendar_loader import CalendarStore
 from app.dashboard import DashboardService
@@ -34,6 +35,16 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title="Inkcross Dashboard", lifespan=lifespan)
+
+template_env = Environment(
+    loader=FileSystemLoader(ROOT / "templates"),
+    autoescape=select_autoescape(("html", "xml")),
+)
+
+
+@app.get("/")
+async def index() -> RedirectResponse:
+    return RedirectResponse(url="/manage", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
 
 @app.get("/health")
@@ -66,6 +77,17 @@ async def dashboard_html() -> Response:
         html = renderer.render_html(data)
     except Exception as exc:
         raise HTTPException(status_code=500, detail="dashboard generation failed") from exc
+    return Response(
+        content=html,
+        media_type="text/html",
+        headers={"Cache-Control": "no-store"},
+    )
+
+
+@app.get("/manage")
+async def manage() -> Response:
+    template = template_env.get_template("manage.html")
+    html = template.render()
     return Response(
         content=html,
         media_type="text/html",
