@@ -130,6 +130,8 @@ def _hourly_forecasts(*, hourly: dict[str, Any], current: datetime) -> list[Hour
         forecast_time = _parse_datetime(str(time_text))
         if forecast_time < current:
             continue
+        if forecast_time.hour % 3 != 0:
+            continue
         code = int(weather_code)
         label, icon = describe_weather(code)
         forecasts.append(
