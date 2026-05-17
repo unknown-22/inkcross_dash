@@ -115,6 +115,7 @@ def _hourly_forecasts(*, hourly: dict[str, Any], current: datetime) -> list[Hour
     temperatures = _required_list(hourly, "temperature_2m")
     precipitation_probabilities = _required_list(hourly, "precipitation_probability")
     weather_codes = _required_list(hourly, "weather_code")
+    first_slot = _current_three_hour_slot(current)
 
     if not (len(times) == len(temperatures) == len(precipitation_probabilities) == len(weather_codes)):
         raise ValueError("Open-Meteo hourly arrays have inconsistent lengths")
@@ -128,7 +129,7 @@ def _hourly_forecasts(*, hourly: dict[str, Any], current: datetime) -> list[Hour
         strict=True,
     ):
         forecast_time = _parse_datetime(str(time_text))
-        if forecast_time < current:
+        if forecast_time < first_slot:
             continue
         if forecast_time.hour % 3 != 0:
             continue
@@ -150,6 +151,10 @@ def _hourly_forecasts(*, hourly: dict[str, Any], current: datetime) -> list[Hour
     if forecasts:
         return forecasts
     raise ValueError("Open-Meteo hourly forecast has no upcoming slots")
+
+
+def _current_three_hour_slot(current: datetime) -> datetime:
+    return current.replace(hour=current.hour // 3 * 3, minute=0, second=0, microsecond=0)
 
 
 def _optional_int(value: Any) -> int | None:

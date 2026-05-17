@@ -19,7 +19,7 @@ def test_describe_weather_maps_wmo_codes() -> None:
     assert describe_weather(999) == ("曇り", "cloud")
 
 
-def test_parse_open_meteo_forecast_uses_daily_and_upcoming_three_hourly_values() -> None:
+def test_parse_open_meteo_forecast_uses_daily_and_current_three_hourly_values() -> None:
     payload = {
         "daily": {
             "time": ["2026-05-17", "2026-05-18"],
@@ -59,14 +59,54 @@ def test_parse_open_meteo_forecast_uses_daily_and_upcoming_three_hourly_values()
     assert forecast.daily.precipitation_probability == 10
     assert forecast.daily.label == "晴れ"
     assert [hour.time for hour in forecast.hourly] == [
+        datetime(2026, 5, 17, 12, 0, tzinfo=TOKYO_TZ),
         datetime(2026, 5, 17, 15, 0, tzinfo=TOKYO_TZ),
         datetime(2026, 5, 17, 18, 0, tzinfo=TOKYO_TZ),
         datetime(2026, 5, 17, 21, 0, tzinfo=TOKYO_TZ),
-        datetime(2026, 5, 18, 0, 0, tzinfo=TOKYO_TZ),
     ]
-    assert [hour.temperature for hour in forecast.hourly] == [26.9, 25.8, 24.0, 23.2]
-    assert [hour.precipitation_probability for hour in forecast.hourly] == [30, 50, 70, 80]
-    assert [hour.icon for hour in forecast.hourly] == ["rain", "partly", "storm", "sun"]
+    assert [hour.temperature for hour in forecast.hourly] == [26.5, 26.9, 25.8, 24.0]
+    assert [hour.precipitation_probability for hour in forecast.hourly] == [0, 30, 50, 70]
+    assert [hour.icon for hour in forecast.hourly] == ["sun", "rain", "partly", "storm"]
+
+
+def test_parse_open_meteo_forecast_starts_hourly_values_from_current_three_hour_slot() -> None:
+    payload = {
+        "daily": {
+            "time": ["2026-05-17", "2026-05-18"],
+            "temperature_2m_max": [27.3, 26.0],
+            "temperature_2m_min": [13.0, 14.4],
+            "weather_code": [0, 3],
+            "precipitation_probability_max": [10, 40],
+        },
+        "hourly": {
+            "time": [
+                "2026-05-17T20:00",
+                "2026-05-17T21:00",
+                "2026-05-17T22:00",
+                "2026-05-17T23:00",
+                "2026-05-18T00:00",
+                "2026-05-18T01:00",
+                "2026-05-18T02:00",
+                "2026-05-18T03:00",
+                "2026-05-18T04:00",
+                "2026-05-18T05:00",
+                "2026-05-18T06:00",
+            ],
+            "temperature_2m": [24.5, 24.0, 23.5, 23.3, 23.2, 22.9, 22.5, 22.0, 21.8, 21.5, 21.0],
+            "precipitation_probability": [65, 70, 75, 78, 80, 82, 85, 88, 90, 92, 95],
+            "weather_code": [61, 95, 3, 1, 0, 0, 1, 3, 61, 95, 3],
+        },
+    }
+    now = datetime(2026, 5, 17, 21, 10, tzinfo=ZoneInfo("Asia/Tokyo"))
+
+    forecast = parse_open_meteo_forecast(payload, now=now)
+
+    assert [hour.time for hour in forecast.hourly] == [
+        datetime(2026, 5, 17, 21, 0, tzinfo=TOKYO_TZ),
+        datetime(2026, 5, 18, 0, 0, tzinfo=TOKYO_TZ),
+        datetime(2026, 5, 18, 3, 0, tzinfo=TOKYO_TZ),
+        datetime(2026, 5, 18, 6, 0, tzinfo=TOKYO_TZ),
+    ]
 
 
 def test_parse_open_meteo_forecast_uses_next_daily_when_today_is_missing() -> None:
