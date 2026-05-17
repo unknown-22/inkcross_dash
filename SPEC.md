@@ -27,7 +27,7 @@
                               ┌────────────────────────┼────────────────────────┐
                               ▼                        ▼                        ▼
                     ┌──────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-                    │   気象庁JSON      │    │  calendar.json  │    │   todo.json     │
+                    │   Open-Meteo     │    │  calendar.json  │    │   todo.json     │
                     │  (天気予報)       │    │  (ローカル)      │    │   (ローカル)     │
                     └──────────────────┘    └─────────────────┘    └─────────────────┘
 ```
@@ -36,7 +36,7 @@
 
 1. 端末がサーバにHTTP GETリクエスト
 2. サーバが各データソースから情報を取得
-   - 気象庁JSONから天気予報
+   - Open-Meteoから天気予報
    - `calendar.json`からカレンダー
    - `todo.json`からToDo
 3. サーバがHTMLテンプレートにデータを差し込み
@@ -118,10 +118,10 @@ jinja2
 - 曜日 (日本語: 月/火/水/木/金/土/日)
 
 #### 天気エリア (~280px)
-- 取得地点: **東京地方** (予報区コード: 130010 / 気温地点コード: 44132)
+- 取得地点: **東京** (緯度 35.6895 / 経度 139.6917)
 - 今日の最高気温・最低気温
-- 天気アイコン (晴れ/曇り/雨/雪などを気象庁天気コードからマッピング)
-- 降水確率が提供される時間帯ごとの予報のうち、現在時刻を含む直近の時間帯から最大4件表示
+- 天気アイコン (晴れ/曇り/雨/雪などをWMO天気コードからマッピング)
+- 1時間ごとの予報のうち、現在時刻以降の直近4件を表示
 
 #### カレンダー (下部左列)
 - 今日の予定のみ表示
@@ -133,21 +133,35 @@ jinja2
 
 ## 5. データ仕様
 
-### 5.1 天気予報 (気象庁JSON)
+### 5.1 天気予報 (Open-Meteo)
 
-エンドポイント: `https://www.jma.go.jp/bosai/forecast/data/forecast/130000.json`
+エンドポイント: `https://api.open-meteo.com/v1/forecast`
+
+固定パラメータ:
+- `latitude=35.6895`
+- `longitude=139.6917`
+- `timezone=Asia/Tokyo`
+- `forecast_days=2`
+- `hourly=temperature_2m,precipitation_probability,weather_code`
+- `daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max`
 
 利用する主なデータ:
-- `timeSeries[0]`: 東京地方 (`130010`) の天気コード
-- `timeSeries[1]`: 東京地方 (`130010`) の時間帯別降水確率
-- `timeSeries[2]`: 東京 (`44132`) の気温
-- 週間予報側の気温: 短期予報で最高/最低気温が空の場合の補完に利用
+- `daily.temperature_2m_max`: 今日の最高気温
+- `daily.temperature_2m_min`: 今日の最低気温
+- `daily.weather_code`: 今日の代表天気コード
+- `daily.precipitation_probability_max`: 今日の最大降水確率
+- `hourly.temperature_2m`: 1時間ごとの気温
+- `hourly.precipitation_probability`: 1時間ごとの降水確率
+- `hourly.weather_code`: 1時間ごとの天気コード
 
-気象庁天気コード → アイコンマッピング (主要なもの):
-- 100番台: 晴れ / 晴れ時々曇り
-- 200番台: 曇り
-- 300番台: 雨
-- 400番台: 雪
+WMO天気コード → アイコンマッピング (主要なもの):
+- `0`: 晴れ
+- `1, 2`: 晴れ時々曇り
+- `3`: 曇り
+- `45, 48`: 霧
+- `51-67, 80-82`: 雨
+- `71-77, 85, 86`: 雪
+- `95, 96, 99`: 雷雨
 
 ### 5.2 カレンダー (calendar.json)
 
@@ -228,7 +242,7 @@ jinja2
 ### 7.1 ステップ
 
 1. **データ取得**
-   - 気象庁JSON呼び出し (httpx)
+   - Open-Meteo呼び出し (httpx)
    - `calendar.json` 読み込み
    - `todo.json` 読み込み
 2. **HTMLレンダリング**
@@ -312,7 +326,7 @@ eink-dashboard/
 │   ├── style.css
 │   └── icons/               # 天気アイコンSVG等
 └── app/
-    ├── weather.py           # 気象庁JSON呼び出し
+    ├── weather.py           # Open-Meteo呼び出し
     ├── calendar_loader.py   # カレンダーJSON読み込み
     ├── todo_loader.py       # ToDoJSON読み込み
     ├── renderer.py          # Playwright画像生成
@@ -342,7 +356,7 @@ eink-dashboard/
 | 項目 | 決定内容 |
 |------|---------|
 | 表示情報 | 天気予報 / カレンダー / ToDo |
-| 天気データソース | 気象庁JSON (キー不要) |
+| 天気データソース | Open-Meteo Forecast API (キー不要) |
 | カレンダーデータソース | ローカルJSONファイル |
 | ToDoデータソース | ローカルJSONファイル |
 | 画像生成方法 | Playwright + HTML/CSS |
@@ -350,7 +364,7 @@ eink-dashboard/
 | 色表現 | **4階調グレースケール (黒/濃灰/薄灰/白)** |
 | 画像フォーマット | **4bit BMP** |
 | レイアウト | パターンC: ヘッダー + 縦積み |
-| 天気詳細度 | 最高/最低 + 時間帯ごとの降水確率予報 |
+| 天気詳細度 | 最高/最低 + 1時間ごとの気温・降水確率予報 |
 | カレンダー期間 | 今日のみ |
 | ToDo表示条件 | 未完了のみ・スペース許す限り |
 | Webフレームワーク | FastAPI |
@@ -359,4 +373,4 @@ eink-dashboard/
 | デプロイ | ローカルマシン |
 | キャッシュ | なし (リクエストごとに生成) |
 | エラー時の振る舞い | HTTP 500を返却 |
-| 天気の地点 | 東京地方 |
+| 天気の地点 | 東京 (緯度 35.6895 / 経度 139.6917) |

@@ -22,7 +22,7 @@
     .dashboard {
       display: grid;
       position: relative;
-      grid-template-rows: 64px 185px 551px;
+      grid-template-rows: 64px 225px 503px;
       width: 480px;
       height: 800px;
       border: 4px solid #000;
@@ -123,7 +123,7 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 8px;
-      height: 128px;
+      height: 124px;
     }
 
     .hour {
@@ -131,7 +131,7 @@
       grid-template-rows: auto 1fr auto;
       gap: 6px;
       min-width: 0;
-      padding: 8px 6px;
+      padding: 5px 6px;
       border: 3px solid #aaa;
       align-items: stretch;
       background: #fafafa;
@@ -162,8 +162,8 @@
     }
 
     .hour-weather .svg-icon {
-      width: 46px;
-      height: 46px;
+      width: 38px;
+      height: 38px;
     }
 
     .hour-metrics {
@@ -176,9 +176,31 @@
     }
 
     .hour-temp {
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 900;
       white-space: nowrap;
+    }
+
+    .weather-summary {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      margin-bottom: 7px;
+      line-height: 1;
+    }
+
+    .daily-temp {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      font-size: 22px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .daily-temp .meta-icon {
+      width: 18px;
+      height: 18px;
     }
 
     .hour-rain {
@@ -335,6 +357,16 @@
         <span class="svg-icon heading-icon" aria-hidden="true">{{ icons["heading-weather"] }}</span>
         <span>天気</span>
       </h1>
+      <div class="weather-summary">
+        <div class="daily-temp">
+          <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["temp-high"] }}</span>
+          {{ "%.0f"|format(data.weather.daily.temperature_max) }}°
+        </div>
+        <div class="daily-temp">
+          <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["temp-low"] }}</span>
+          {{ "%.0f"|format(data.weather.daily.temperature_min) }}°
+        </div>
+      </div>
       <div class="hourly">
         {% for forecast in data.weather.hourly %}
           <div class="hour">

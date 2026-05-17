@@ -47,6 +47,8 @@ async def test_renderer_outputs_four_bit_bmp() -> None:
 
     assert "2026/05/03 12:00" in html
     assert "05/03" in html
+    assert "22°" in html
+    assert "14°" in html
     assert bmp[:2] == b"BM"
     assert len(bmp) == 192118
     assert int.from_bytes(bmp[18:22], "little", signed=True) == 480
