@@ -119,120 +119,66 @@
       height: 28px;
     }
 
-    .weather-main {
-      display: grid;
-      grid-template-columns: 100px 1fr;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 7px;
-    }
-
-    .weather-icon {
-      display: grid;
-      place-items: center;
-      height: 64px;
-      border: 3px solid #000;
-      background: #eee;
-      color: #000;
-    }
-
-    .weather-icon .svg-icon {
-      width: 50px;
-      height: 50px;
-    }
-
-    .weather-summary {
-      min-width: 0;
-    }
-
-    .weather-label {
-      display: flex;
-      gap: 8px;
-      align-items: baseline;
-      margin-bottom: 4px;
-      font-size: 26px;
-      font-weight: 800;
-      line-height: 1;
-    }
-
-    .weather-precipitation {
-      display: inline-flex;
-      gap: 3px;
-      align-items: center;
-      color: #555;
-      font-size: 18px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .weather-precipitation .meta-icon {
-      width: 15px;
-      height: 15px;
-    }
-
-    .temperature {
-      display: flex;
-      gap: 10px;
-      font-size: 24px;
-      font-weight: 800;
-    }
-
-    .temperature div {
-      display: flex;
-      gap: 4px;
-      align-items: center;
-    }
-
-    .temperature span {
-      color: #555;
-      font-size: 18px;
-      font-weight: 700;
-    }
-
     .hourly {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 7px;
+      gap: 8px;
+      height: 128px;
     }
 
     .hour {
       display: grid;
-      grid-template-columns: 34px 1fr;
-      gap: 5px;
-      min-height: 56px;
-      padding: 4px 5px;
-      border: 2px solid #aaa;
-      align-items: center;
+      grid-template-rows: auto 1fr auto;
+      gap: 6px;
+      min-width: 0;
+      padding: 8px 6px;
+      border: 3px solid #aaa;
+      align-items: stretch;
+      background: #fafafa;
+    }
+
+    .hour-datetime {
+      display: grid;
+      gap: 2px;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .hour-date {
+      color: #555;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .hour-time {
+      font-size: 19px;
+      font-weight: 900;
     }
 
     .hour-weather {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: grid;
+      place-items: center;
       min-width: 0;
     }
 
     .hour-weather .svg-icon {
-      width: 30px;
-      height: 30px;
+      width: 46px;
+      height: 46px;
     }
 
-    .hour-detail {
-      display: grid;
-      gap: 1px;
+    .hour-metrics {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 5px;
       min-width: 0;
-    }
-
-    .hour-time {
-      font-size: 12px;
-      font-weight: 700;
       line-height: 1;
     }
 
     .hour-temp {
-      font-size: 16px;
-      font-weight: 800;
-      line-height: 1.05;
+      font-size: 24px;
+      font-weight: 900;
+      white-space: nowrap;
     }
 
     .hour-rain {
@@ -240,9 +186,9 @@
       gap: 2px;
       align-items: center;
       color: #555;
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 1;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
     }
 
     .hour-rain .meta-icon {
@@ -389,38 +335,17 @@
         <span class="svg-icon heading-icon" aria-hidden="true">{{ icons["heading-weather"] }}</span>
         <span>天気</span>
       </h1>
-      <div class="weather-main">
-        <div class="weather-icon">
-          <span class="svg-icon" aria-hidden="true">{{ icons["weather-" ~ data.weather.daily.icon] }}</span>
-        </div>
-        <div class="weather-summary">
-          <div class="weather-label">
-            <span>{{ data.weather.daily.label }}</span>
-            <span class="weather-precipitation">
-              <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["precipitation"] }}</span>
-              {{ data.weather.daily.precipitation_probability if data.weather.daily.precipitation_probability is not none else "-" }}%
-            </span>
-          </div>
-          <div class="temperature">
-            <div>
-              <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["temp-high"] }}</span>
-              <span>最高</span> {{ "%.0f"|format(data.weather.daily.temperature_max) }}°
-            </div>
-            <div>
-              <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["temp-low"] }}</span>
-              <span>最低</span> {{ "%.0f"|format(data.weather.daily.temperature_min) }}°
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="hourly">
         {% for forecast in data.weather.hourly %}
           <div class="hour">
+            <div class="hour-datetime">
+              <div class="hour-date">{{ forecast.time.strftime("%m/%d") }}</div>
+              <div class="hour-time">{{ forecast.time.strftime("%H:%M") }}</div>
+            </div>
             <div class="hour-weather">
               <span class="svg-icon" aria-hidden="true">{{ icons["weather-" ~ forecast.icon] }}</span>
             </div>
-            <div class="hour-detail">
-              <div class="hour-time">{{ forecast.time.strftime("%H:%M") }}</div>
+            <div class="hour-metrics">
               <div class="hour-temp">{{ "%.0f"|format(forecast.temperature) }}°</div>
               <div class="hour-rain">
                 <span class="svg-icon meta-icon" aria-hidden="true">{{ icons["precipitation"] }}</span>
