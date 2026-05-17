@@ -303,15 +303,23 @@ def _hourly_forecasts(
         if temp != ""
     ]
 
+    precipitation_slots = [
+        (_parse_datetime(time_text), pop)
+        for time_text, pop in zip(
+            precipitation_series["timeDefines"],
+            precipitation_area["pops"],
+            strict=False,
+        )
+    ]
+    start_index = 0
+    for index, (forecast_time, _) in enumerate(precipitation_slots):
+        if forecast_time <= current:
+            start_index = index
+        else:
+            break
+
     forecasts: list[HourlyForecast] = []
-    for time_text, pop in zip(
-        precipitation_series["timeDefines"],
-        precipitation_area["pops"],
-        strict=False,
-    ):
-        forecast_time = _parse_datetime(time_text)
-        if forecast_time < current:
-            continue
+    for forecast_time, pop in precipitation_slots[start_index:]:
         code = _nearest_weather_code(weather_slots, forecast_time)
         label, icon = describe_weather(code)
         forecasts.append(
