@@ -1,0 +1,3 @@
+repository:
+  description: "天気・予定・ToDoをまとめたE-ink端末向けダッシュボード画像を生成・配信するFastAPIサーバ"
+  topics: "python, fastapi, e-ink, dashboard, playwright, pillow, jinja2, open-meteo"
