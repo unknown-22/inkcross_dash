@@ -1,15 +1,18 @@
 from __future__ import annotations
 
+import ssl
 from datetime import datetime
 from typing import Any, cast
 from zoneinfo import ZoneInfo
 
+import certifi
 import httpx
 
 from app.models import DailyForecast, HourlyForecast, WeatherForecast
 
 TOKYO_TZ = ZoneInfo("Asia/Tokyo")
 OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
+REQUEST_TIMEOUT_SECONDS = 10
 TOKYO_LATITUDE = 35.6895
 TOKYO_LONGITUDE = 139.6917
 
@@ -48,12 +51,25 @@ class OpenMeteoWeatherClient:
 
     async def fetch(self, now: datetime | None = None) -> WeatherForecast:
         if self._client is None:
-            async with httpx.AsyncClient(timeout=10) as client:
+            async with create_http_client() as client:
                 response = await client.get(OPEN_METEO_FORECAST_URL, params=OPEN_METEO_PARAMS)
         else:
             response = await self._client.get(OPEN_METEO_FORECAST_URL, params=OPEN_METEO_PARAMS)
         response.raise_for_status()
         return parse_open_meteo_forecast(cast(dict[str, Any], response.json()), now=now)
+
+
+def create_http_client() -> httpx.AsyncClient:
+    """環境変数に依存しない HTTPS クライアントを作る。
+
+    httpx は動作環境の SSL_CERT_FILE / SSL_CERT_DIR を既定で参照するため、
+    存在しない CA バンドルを指す環境変数（例: 別ツールが埋め込んだ古いパス）を
+    プロセスが引き継いでいると、クライアント生成時に FileNotFoundError で
+    常に失敗する。certifi の CA バンドルから SSLContext を作り、
+    実行環境の TLS 設定から切り離す。
+    """
+    context = ssl.create_default_context(cafile=certifi.where())
+    return httpx.AsyncClient(timeout=REQUEST_TIMEOUT_SECONDS, verify=context)
 
 
 def parse_open_meteo_forecast(payload: dict[str, Any], now: datetime | None = None) -> WeatherForecast:

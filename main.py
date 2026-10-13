@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -19,6 +20,8 @@ from app.todo_loader import TodoStore
 
 ROOT = Path(__file__).parent
 DEFAULT_PORT = 8080
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -60,6 +63,8 @@ async def dashboard_bmp() -> Response:
         data = await service.build()
         bmp = await renderer.render_bmp(data)
     except Exception as exc:
+        # 原因を追えるようスタックトレースをログに残す（レスポンスは従来どおり一般的な文言）
+        logger.exception("/dashboard.bmp の生成に失敗しました")
         raise HTTPException(status_code=500, detail="dashboard generation failed") from exc
     return Response(
         content=bmp,
@@ -76,6 +81,7 @@ async def dashboard_html() -> Response:
         data = await service.build()
         html = renderer.render_html(data)
     except Exception as exc:
+        logger.exception("/dashboard.html の生成に失敗しました")
         raise HTTPException(status_code=500, detail="dashboard generation failed") from exc
     return Response(
         content=html,

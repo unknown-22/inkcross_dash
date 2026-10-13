@@ -1,11 +1,27 @@
 from __future__ import annotations
 
 from datetime import datetime
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import pytest
 
-from app.weather import TOKYO_TZ, describe_weather, parse_open_meteo_forecast
+from app.weather import TOKYO_TZ, create_http_client, describe_weather, parse_open_meteo_forecast
+
+
+@pytest.mark.asyncio
+async def test_create_http_client_ignores_broken_ssl_cert_file(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """存在しない SSL_CERT_FILE を引き継いでも TLS コンテキストの生成で失敗しない。
+
+    httpx は SSL_CERT_FILE を既定で参照するため、古いパスを指す環境変数を
+    プロセスが継承していると、リクエスト時に必ず 500 になっていた。
+    """
+    monkeypatch.setenv("SSL_CERT_FILE", str(tmp_path / "missing-cacert.pem"))
+
+    async with create_http_client() as client:
+        assert client is not None
 
 
 def test_describe_weather_maps_wmo_codes() -> None:

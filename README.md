@@ -47,6 +47,17 @@ uv run python main.py
 uv run python main.py --port 9000
 ```
 
+## トラブルシューティング
+
+### `/dashboard.bmp` が `{"detail":"dashboard generation failed"}` を返す
+
+原因究明のため、例外のスタックトレースをサーバのログに出力します（pm2 運用時は `~/.pm2/logs/inkcross-dash-error-*.log`）。まずこのトレースを確認してください。
+
+よくある原因は、起動元シェルから引き継いだ環境変数です。
+
+- `SSL_CERT_FILE` / `SSL_CERT_DIR` が存在しない CA バンドルを指している場合、httpx がクライアント生成時に `FileNotFoundError` で失敗し、天気取得を伴う `/dashboard.bmp` と `/dashboard.html` の両方が 500 になります。アプリ側は certifi の CA バンドルから SSLContext を作るため影響を受けません。
+- `PLAYWRIGHT_BROWSERS_PATH` が Playwright のブラウザを別ディレクトリへ誘導している場合、画像化の際に `Executable doesn't exist` になります。pm2 など常駐起動する場合は `ecosystem.config.cjs` の `env` でブラウザ配置先を固定してください。
+
 ## API
 
 ### `GET /`

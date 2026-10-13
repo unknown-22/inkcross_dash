@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from typing import Any
 
 import pytest
@@ -129,6 +130,30 @@ async def test_dashboard_html_returns_500_on_generation_error() -> None:
     exception = exc_info.value
     assert exception.status_code == 500
     assert exception.detail == "dashboard generation failed"
+
+
+@pytest.mark.asyncio
+async def test_dashboard_bmp_logs_failure_traceback(caplog: pytest.LogCaptureFixture) -> None:
+    main.app.state.dashboard_service = FakeFailingService()
+    main.app.state.dashboard_renderer = FakeRenderer()
+
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(HTTPException):
+            await main.dashboard_bmp()
+
+    assert "failed" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_dashboard_html_logs_failure_traceback(caplog: pytest.LogCaptureFixture) -> None:
+    main.app.state.dashboard_service = FakeFailingService()
+    main.app.state.dashboard_renderer = FakeRenderer()
+
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(HTTPException):
+            await main.dashboard_html()
+
+    assert "failed" in caplog.text
 
 
 def test_calendar_api_get_add_and_refresh(tmp_path) -> None:
